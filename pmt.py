@@ -88,72 +88,72 @@ for url in urls:
 
 
 
-import requests
+# import requests
 
-# Configuration for Supabase REST API
-API_URL = "https://aws-0-eu-north-1.pooler.supabase.com/rest/v1/counter"
-API_KEY = "YOUR_SUPABASE_ANON_KEY"  # replace with your anon/public key
-HEADERS = {
-    "apikey": API_KEY,
-    "Authorization": f"Bearer {API_KEY}",
-    "Accept": "application/json",
-}
+# # Configuration for Supabase REST API
+# API_URL = "https://aws-0-eu-north-1.pooler.supabase.com/rest/v1/counter"
+# API_KEY = "YOUR_SUPABASE_ANON_KEY"  # replace with your anon/public key
+# HEADERS = {
+#     "apikey": API_KEY,
+#     "Authorization": f"Bearer {API_KEY}",
+#     "Accept": "application/json",
+# }
 
-market_titles = [
-    "us-military-action-against-iran-before-august",
-    "khamenei-out-as-supreme-leader-of-iran-in-2025",
-    "us-x-iran-nuclear-deal-in-2025",
-    "us-iran-nuclear-deal-before-july",
-    "khamenei-out-as-supreme-leader-of-iran-by-june-30",
-]
+# market_titles = [
+#     "us-military-action-against-iran-before-august",
+#     "khamenei-out-as-supreme-leader-of-iran-in-2025",
+#     "us-x-iran-nuclear-deal-in-2025",
+#     "us-iran-nuclear-deal-before-july",
+#     "khamenei-out-as-supreme-leader-of-iran-by-june-30",
+# ]
 
-diff_notifications = []
+# diff_notifications = []
 
-for title in market_titles:
-    # Fetch the last 6 entries (current + previous 5) for this market, newest first
-    resp = requests.get(
-        API_URL,
-        params={
-            "market_title": f"eq.{title}",
-            "order": "created_at.desc",
-            "limit": 6
-        },
-        headers=HEADERS
-    )
-    resp.raise_for_status()
-    rows = resp.json()
-    if not rows:
-        continue
+# for title in market_titles:
+#     # Fetch the last 6 entries (current + previous 5) for this market, newest first
+#     resp = requests.get(
+#         API_URL,
+#         params={
+#             "market_title": f"eq.{title}",
+#             "order": "created_at.desc",
+#             "limit": 6
+#         },
+#         headers=HEADERS
+#     )
+#     resp.raise_for_status()
+#     rows = resp.json()
+#     if not rows:
+#         continue
 
-    # The first row is the current value
-    current = rows[0]["market_value"]
+#     # The first row is the current value
+#     current = rows[0]["market_value"]
 
-    # The next up to 5 rows are used to compute the baseline
-    previous = rows[1:6]
-    if previous:
-        baseline = sum(r["market_value"] for r in previous) / len(previous)
-    else:
-        baseline = current
+#     # The next up to 5 rows are used to compute the baseline
+#     previous = rows[1:6]
+#     if previous:
+#         baseline = sum(r["market_value"] for r in previous) / len(previous)
+#     else:
+#         baseline = current
 
-    diff = current - baseline  # in absolute terms (e.g. 0.07 = 7%)
-    pct = diff * 100
+#     diff = current - baseline  # in absolute terms (e.g. 0.07 = 7%)
+#     pct = diff * 100
 
-    # Categorize by thresholds
-    if diff > 0.08:
-        emoji = "🟢"
-    elif 0.05 < diff <= 0.08:
-        emoji = "🎾"
-    elif -0.08 <= diff < -0.05:
-        emoji = "🟠"
-    elif diff < -0.08:
-        emoji = "🔴"
-    else:
-        # skip small moves
-        continue
+#     # Categorize by thresholds
+#     if diff > 0.08:
+#         emoji = "🟢"
+#     elif 0.05 < diff <= 0.08:
+#         emoji = "🎾"
+#     elif -0.08 <= diff < -0.05:
+#         emoji = "🟠"
+#     elif diff < -0.08:
+#         emoji = "🔴"
+#     else:
+#         # skip small moves
+#         continue
 
-    diff_notifications.append(f"{emoji} {pct:+.2f}% – {title}")
+#     diff_notifications.append(f"{emoji} {pct:+.2f}% – {title}")
 
-# Now you can, for example, display or log these:
-for note in diff_notifications:
-    print(note)
+# # Now you can, for example, display or log these:
+# for note in diff_notifications:
+#     print(note)
 
