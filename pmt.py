@@ -84,7 +84,6 @@ for url in urls:
 
 
 
-```python
 import streamlit as st
 import psycopg2
 import numpy as np
@@ -166,5 +165,5 @@ else:
 # This would typically be at the end of the script.
 # cursor.close()
 # conn.close()
-```
+
 
