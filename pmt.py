@@ -88,7 +88,6 @@ for url in urls:
 
 
 
-```python
 import requests
 
 # Configuration for Supabase REST API
@@ -157,4 +156,4 @@ for title in market_titles:
 # Now you can, for example, display or log these:
 for note in diff_notifications:
     print(note)
-```
+
