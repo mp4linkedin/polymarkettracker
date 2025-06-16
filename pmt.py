@@ -84,54 +84,77 @@ for url in urls:
 
 
 
+```python
+import requests
 
-import streamlit as st
-import psycopg2
+# Configuration for Supabase REST API
+API_URL = "https://aws-0-eu-north-1.pooler.supabase.com/rest/v1/counter"
+API_KEY = "YOUR_SUPABASE_ANON_KEY"  # replace with your anon/public key
+HEADERS = {
+    "apikey": API_KEY,
+    "Authorization": f"Bearer {API_KEY}",
+    "Accept": "application/json",
+}
 
-# assume `conn` is an existing psycopg2 connection
-cursor = conn.cursor()
+market_titles = [
+    "us-military-action-against-iran-before-august",
+    "khamenei-out-as-supreme-leader-of-iran-in-2025",
+    "us-x-iran-nuclear-deal-in-2025",
+    "us-iran-nuclear-deal-before-july",
+    "khamenei-out-as-supreme-leader-of-iran-by-june-30",
+]
 
-# Collect all distinct market titles
-cursor.execute("SELECT DISTINCT market_title FROM counter;")
-market_titles = [row[0] for row in cursor.fetchall()]
+diff_notifications = []
 
-for market_title in market_titles:
-    # Fetch the previous 5 values (excluding the very latest)
-    cursor.execute("""
-        SELECT market_value
-        FROM counter
-        WHERE market_title = %s
-        ORDER BY created_at DESC
-        OFFSET 1
-        LIMIT 5;
-    """, (market_title,))
-    prev_values = [r[0] for r in cursor.fetchall()]
-    
-    if len(prev_values) < 5:
-        continue  # not enough data yet
-    
-    baseline = sum(prev_values) / len(prev_values)
-    
-    # Fetch the current (most recent) value
-    cursor.execute("""
-        SELECT market_value
-        FROM counter
-        WHERE market_title = %s
-        ORDER BY created_at DESC
-        LIMIT 1;
-    """, (market_title,))
-    current = cursor.fetchone()[0]
-    
-    diff = current - baseline  # in fractional terms (e.g. 0.05 == 5%)
-    pct = diff * 100           # convert to percentage
-    
+for title in market_titles:
+    # Fetch the last 6 entries (current + previous 5) for this market, newest first
+    resp = requests.get(
+        API_URL,
+        params={
+            "market_title": f"eq.{title}",
+            "order": "created_at.desc",
+            "limit": 6
+        },
+        headers=HEADERS
+    )
+    resp.raise_for_status()
+    rows = resp.json()
+    if not rows:
+        continue
+
+    # The first row is the current value
+    current = rows[0]["market_value"]
+
+    # The next up to 5 rows are used to compute the baseline
+    previous = rows[1:6]
+    if previous:
+        baseline = sum(r["market_value"] for r in previous) / len(previous)
+    else:
+        baseline = current
+
+    diff = current - baseline  # in absolute terms (e.g. 0.07 = 7%)
+    pct = diff * 100
+
+    # Categorize by thresholds
     if diff > 0.08:
-        st.write(f"🟢 +{pct:.2f}% – {market_title}")
+        emoji = "🟢"
     elif 0.05 < diff <= 0.08:
-        st.write(f"🎾 +{pct:.2f}% – {market_title}")
+        emoji = "🎾"
     elif -0.08 <= diff < -0.05:
-        st.write(f"🟠 {pct:.2f}% – {market_title}")
+        emoji = "🟠"
     elif diff < -0.08:
+        emoji = "🔴"
+    else:
+        # skip small moves
+        continue
+
+    diff_notifications.append(f"{emoji} {pct:+.2f}% – {title}")
+
+# Now you can, for example, display or log these:
+for note in diff_notifications:
+    print(note)
+```
+
         st.write(f"🔴 {pct:.2f}% – {market_title}")
 
 
