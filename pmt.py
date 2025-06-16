@@ -76,7 +76,7 @@ else:
         })
         st.success("Fetched and updated URL")
         st.markdown(f"**Market Title:** {title}")
-        st.markdown(f"**Yes Price:** {yes_price}")
+        st.markdown(f"**Yes PrFFice:** {yes_price}")
         st.markdown(f"**No Price:** {no_price}")
     else:
         st.error(no_price or "Failed to fetch market data.")
