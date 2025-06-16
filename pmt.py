@@ -38,21 +38,19 @@ def fetch_market(slug: str):
             market = data[0]
             title = market.get("question", "Unknown Title")
 
+            # Parse prices from stringified list
             raw_prices = market.get("outcomePrices", "[]")
-            try:
-                prices = json.loads(raw_prices)
-                yes_price = prices[0] if len(prices) > 0 else "N/A"
-                no_price = prices[1] if len(prices) > 1 else "N/A"
-            except Exception:
-                yes_price = "N/A"
-                no_price = "N/A"
+            prices = json.loads(raw_prices)
 
-            return title, yes_price, no_price
+            yes_price = prices[0] if len(prices) > 0 else "N/A"
+            no_price = prices[1] if len(prices) > 1 else "N/A"
+
+            return title, str(yes_price), str(no_price)
         return None, None, None
     except Exception as e:
         return None, None, f"Error: {str(e)}"
 
-# ✅ Read from URL query
+# ✅ Read query parameters (they come as flat strings)
 params = st.query_params
 slug = params.get("slug", "us-military-action-against-iran-before-august")
 title = params.get("title")
@@ -69,6 +67,7 @@ else:
         title, yes_price, no_price = fetch_market(slug)
 
     if title and yes_price and no_price:
+        # ✅ store only clean, flat values
         st.query_params.update({
             "slug": slug,
             "title": quote(title),
