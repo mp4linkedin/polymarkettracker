@@ -135,15 +135,15 @@ def add_diff(message: str):
         pass
 
 
-    # url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
-    # params = {
-    #     "chat_id": "289053770",
-    #     "text": message
-    # }
-    # try:
-    #     requests.get(url, params=params, timeout=50)
-    # except requests.RequestException:
-    #     pass  # Silent fail or optionally log error
+    url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
+    params = {
+        "chat_id": "289053770",
+        "text": message
+    }
+    try:
+        requests.get(url, params=params, timeout=50)
+    except requests.RequestException:
+        pass  # Silent fail or optionally log error
 
     url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
     params = {
@@ -215,13 +215,14 @@ for url in urls:
                     # add_diff(convert_gamma_to_polymarket_url(url))
 
                     if diff > 0.04:
-                        add_diff(f"Past five minutes 🔴⏫ +{diff * 100:.2f}% - {title}")
+                        add_diff(f"Last 5 minutes 🔴⏫ +{diff * 100:.2f}% - {title}")
                     elif 0.001 < diff <= 0.04:
-                        add_diff(f"Past five minutes 🔼 +{diff * 100:.2f}% - {title}")
+                        add_diff(f"Last 5 minutes 🟡🔼 +{diff * 100:.2f}% - {title}")
                     elif -0.04 <= diff < -0.001:
-                        add_diff(f"Past five minutes 🔽 {diff * 100:.2f}% - {title}")
+                        add_diff(f"Last 5 minutes 🟡🔽 {diff * 100:.2f}% - {title}")
                     elif diff < -0.04:
-                        add_diff(f"Past five minutes 🔴⏬ {diff * 100:.2f}% - {title}")
+                        add_diff(f"Last 5 minutes 🔴⏬ {diff * 100:.2f}% - {title}")
+                    
             else:
                 st.warning("No valid 'Yes' outcome price found.")
         else:
