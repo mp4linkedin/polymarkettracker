@@ -34,13 +34,13 @@ import json
 #     "https://gamma-api.polymarket.com/markets?slug=khamenei-out-as-supreme-leader-of-iran-by-june-30"
 # ]
 
-urls = [
-    "https://gamma-api.polymarket.com/markets?slug=us-military-action-against-iran-before-august"
-]
+# urls = [
+#     "https://gamma-api.polymarket.com/markets?slug=us-military-action-against-iran-before-august"
+# ]
     
 
 # for url in urls:
-    # url = "https://gamma-api.polymarket.com/markets?slug=us-military-action-against-iran-before-august"
+url = "https://gamma-api.polymarket.com/markets?slug=us-military-action-against-iran-before-august"
     
 try:
     # Send a GET request to the URL
