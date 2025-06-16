@@ -33,6 +33,10 @@ urls = [
     "https://gamma-api.polymarket.com/markets?slug=uus-iran-nuclear-deal-before-julyt",
     "https://gamma-api.polymarket.com/markets?slug=khamenei-out-as-supreme-leader-of-iran-by-june-30"
 ]
+
+urls = [
+    "https://gamma-api.polymarket.com/markets?slug=us-military-action-against-iran-before-august"
+]
     
 
 for url in urls:
