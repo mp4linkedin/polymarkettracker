@@ -118,8 +118,19 @@ conn = psycopg2.connect(
 cursor = conn.cursor()
 
 # Placeholder: define the function you mentioned
-def add_diff(msg: str):
-    st.write(msg)  # Replace with your actual logic
+import requests
+
+def add_diff(message: str):
+    url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
+    params = {
+        "chat_id": "1827419176",
+        "text": message
+    }
+    try:
+        requests.get(url, params=params, timeout=5)
+    except requests.RequestException:
+        pass  # Silent fail or optionally log error
+
 
 st.title("Polymarket Market Data")
 
@@ -169,13 +180,13 @@ for url in urls:
                     baseline = sum(values[1:]) / 5
                     diff = current - baseline
 
-                    if diff > 0.08:
+                    if diff > 0.008:
                         add_diff(f"🟢 +{diff * 100:.2f}% - {title}")
-                    elif 0.05 < diff <= 0.08:
+                    elif 0.005 < diff <= 0.008:
                         add_diff(f"🎾 +{diff * 100:.2f}% - {title}")
-                    elif -0.08 <= diff < -0.05:
+                    elif -0.008 <= diff < -0.005:
                         add_diff(f"🟠 {diff * 100:.2f}% - {title}")
-                    elif diff < -0.08:
+                    elif diff < -0.008:
                         add_diff(f"🔴 {diff * 100:.2f}% - {title}")
             else:
                 st.warning("No valid 'Yes' outcome price found.")
