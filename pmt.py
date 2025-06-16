@@ -101,45 +101,59 @@ for url in urls:
         conn.commit()
 
 
-from supabase import create_client, Client
+import streamlit as st
+from supabase import create_client
 import pandas as pd
 
-# Initialize Supabase client (replace with your own URL and anon key)
-url: str = "https://your-project.supabase.co"
-key: str = "your-anon-or-service-key"
-supabase: Client = create_client(url, key)
+# Supabase config — replace with yours
+SUPABASE_URL = "https://your-project.supabase.co"
+SUPABASE_KEY = "your-anon-or-service-key"
 
-def load_data_from_supabase(table_name: str):
-    response = supabase.table(table_name).select("*").execute()
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+@st.cache_data(ttl=300)
+def load_data():
+    response = supabase.table("your_table_name").select("*").execute()
     if response.status_code == 200:
         data = response.data
         df = pd.DataFrame(data)
-        # Ensure created_at is datetime type
         df['created_at'] = pd.to_datetime(df['created_at'])
         return df
     else:
-        raise Exception(f"Failed to fetch data: {response.status_code} - {response.data}")
+        st.error(f"Error fetching data: {response.status_code}")
+        return pd.DataFrame()
 
 def add_diff(val):
-    print(f"add_diff called with: {val}")
+    st.write(f"add_diff called with: {val}")
 
-df = load_data_from_supabase("your_table_name")
+def process_differences(df):
+    df = df.sort_values(['market_title', 'created_at'])
 
-df = df.sort_values(['market_title', 'created_at'])
+    for market_title, group in df.groupby('market_title'):
+        if len(group) < 2:
+            continue  # Not enough data points
 
-for market_title, group in df.groupby('market_title'):
-    baseline_rows = group.iloc[:-1].tail(5)
-    baseline = baseline_rows['market_value'].mean()
+        baseline_rows = group.iloc[:-1].tail(5)
+        baseline = baseline_rows['market_value'].mean()
 
-    current = group.iloc[-1]['market_value']
+        current = group.iloc[-1]['market_value']
+        diff = current - baseline
 
-    diff = current - baseline
+        if diff > 8:
+            add_diff(f"🟢 +{diff * 100:.2f}% - {market_title}")
+        elif 5 < diff <= 8:
+            add_diff(f"🎾 +{diff * 100:.2f}% - {market_title}")
+        elif -8 <= diff < -5:
+            add_diff(f"🟠 {diff * 100:.2f}% - {market_title}")
+        elif diff < -8:
+            add_diff(f"🔴 {diff * 100:.2f}% - {market_title}")
 
-    if diff > 8:
-        add_diff(f"🟢 +{diff * 100:.2f}% - {market_title}")
-    elif 5 < diff <= 8:
-        add_diff(f"🎾 +{diff * 100:.2f}% - {market_title}")
-    elif -8 <= diff < -5:
-        add_diff(f"🟠 {diff * 100:.2f}% - {market_title}")
-    elif diff < -8:
-        add_diff(f"🔴 {diff * 100:.2f}% - {market_title}")
+st.title("Market Value Difference Tracker")
+
+df = load_data()
+if df.empty:
+    st.warning("No data loaded.")
+else:
+    st.dataframe(df)
+    process_differences(df)
+
