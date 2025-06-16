@@ -3,6 +3,8 @@
 import streamlit as st
 import requests
 import json
+from supabase import create_client
+
 
 # URL of the API endpoint
 
