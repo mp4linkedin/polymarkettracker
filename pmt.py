@@ -124,39 +124,34 @@ import requests
 
 def add_diff(message: str):
     url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
+
     payload = {
         "chat_id": "100010019",
         "text": message
     }
-
     response = requests.post(url, json=payload, timeout=5)
     response.raise_for_status()
-    _ = response.text  # forces full response read, ensures TCP closes cleanly
+    _ = response.text
     time.sleep(1)
 
-
-    url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
-    params = {
+    payload = {
         "chat_id": "289053770",
         "text": message
     }
-
-   response = requests.post(url, json=payload, timeout=5)
+    response = requests.post(url, json=payload, timeout=5)
     response.raise_for_status()
-    _ = response.text  # forces full response read, ensures TCP closes cleanly
+    _ = response.text
     time.sleep(1)
 
-    url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
-    params = {
+    payload = {
         "chat_id": "1827419176",
         "text": message
     }
-
     response = requests.post(url, json=payload, timeout=5)
     response.raise_for_status()
-    _ = response.text  # forces full response read, ensures TCP closes cleanly
+    _ = response.text
     time.sleep(1)
-
+    
 st.title("Polymarket Market Data")
 
 def convert_gamma_to_polymarket_url(gamma_url: str) -> str:
