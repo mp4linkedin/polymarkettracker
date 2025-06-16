@@ -155,6 +155,11 @@ def add_diff(message: str):
 
 st.title("Polymarket Market Data")
 
+def convert_gamma_to_polymarket_url(gamma_url: str) -> str:
+    slug = gamma_url.split("slug=")[-1]
+    return f"https://polymarket.com/event/{slug}"
+
+
 for url in urls:
     try:
         response = requests.get(url)
@@ -202,7 +207,7 @@ for url in urls:
                     diff = current - baseline
 
                     add_diff(f"{title}: current: {current}, baseline [{values[1:]}], {baseline}]")
-                    add_diff(url.replace('gamma-api.',''))
+                    add_diff(convert_gamma_to_polymarket_url(url))
 
                     if diff > 0.04:
                         add_diff(f"⏫ +{diff * 100:.2f}% - {title}")
