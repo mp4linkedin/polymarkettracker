@@ -215,13 +215,13 @@ for url in urls:
                     # add_diff(convert_gamma_to_polymarket_url(url))
 
                     if diff > 0.04:
-                        add_diff(f"Past hour 🔴⏫ +{diff * 100:.2f}% - {title}")
+                        add_diff(f"Past five minutes 🔴⏫ +{diff * 100:.2f}% - {title}")
                     elif 0.001 < diff <= 0.04:
-                        add_diff(f"Past hour 🔼 +{diff * 100:.2f}% - {title}")
+                        add_diff(f"Past five minutes 🔼 +{diff * 100:.2f}% - {title}")
                     elif -0.04 <= diff < -0.001:
-                        add_diff(f"Past hour 🔽 {diff * 100:.2f}% - {title}")
+                        add_diff(f"Past five minutes 🔽 {diff * 100:.2f}% - {title}")
                     elif diff < -0.04:
-                        add_diff(f"Past hour 🔴⏬ {diff * 100:.2f}% - {title}")
+                        add_diff(f"Past five minutes 🔴⏬ {diff * 100:.2f}% - {title}")
             else:
                 st.warning("No valid 'Yes' outcome price found.")
         else:
