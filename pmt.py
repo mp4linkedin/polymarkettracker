@@ -128,7 +128,7 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=50)
+        requests.get(url, params=params, timeout=2)
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
@@ -148,7 +148,7 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=50)
+        requests.get(url, params=params, timeout=3)
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
@@ -212,13 +212,13 @@ for url in urls:
                     # add_diff(convert_gamma_to_polymarket_url(url))
 
                     if diff > 0.04:
-                        add_diff(f"⏫ +{diff * 100:.2f}% - {title}")
+                        add_diff(f"🔴⏫ +{diff * 100:.2f}% - {title}")
                     elif 0.01 < diff <= 0.04:
                         add_diff(f"🔼 +{diff * 100:.2f}% - {title}")
                     elif -0.04 <= diff < -0.01:
                         add_diff(f"🔽 {diff * 100:.2f}% - {title}")
                     elif diff < -0.04:
-                        add_diff(f"⏬ {diff * 100:.2f}% - {title}")
+                        add_diff(f"🔴⏬ {diff * 100:.2f}% - {title}")
             else:
                 st.warning("No valid 'Yes' outcome price found.")
         else:
