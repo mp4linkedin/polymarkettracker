@@ -129,8 +129,9 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        response = requests.post(url, data=payload, timeout=3, stream=False)
+        response = requests.post(url, json=payload, timeout=5)
         response.raise_for_status()
+        _ = response.text  # forces full response read, ensures TCP closes cleanly
     except requests.RequestException:
         pass
 
@@ -141,7 +142,9 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=2)
+       response = requests.post(url, json=payload, timeout=5)
+        response.raise_for_status()
+        _ = response.text  # forces full response read, ensures TCP closes cleanly
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
@@ -151,7 +154,9 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=0.5)
+        response = requests.post(url, json=payload, timeout=5)
+        response.raise_for_status()
+        _ = response.text  # forces full response read, ensures TCP closes cleanly
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
