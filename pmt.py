@@ -203,15 +203,15 @@ for url in urls:
                     # add_diff(baseline)
                     # add_diff(current)
 
-                    if diff > 0.08:
-                        add_diff(f"🟢 +{diff * 100:.2f}% - {title}")
+                    if diff > 0.04:
+                        add_diff(f"⏫ +{diff * 100:.2f}% - {title}")
 
-                    elif 0.04 < diff <= 0.08:
-                        add_diff(f"🎾 +{diff * 100:.2f}% - {title}")
-                    elif -0.08 <= diff < -0.05:
-                        add_diff(f"🟠 {diff * 100:.2f}% - {title}")
-                    elif diff < -0.08:
-                        add_diff(f"🔴 {diff * 100:.2f}% - {title}")
+                    elif 0.01 < diff <= 0.04:
+                        add_diff(f"🔼 +{diff * 100:.2f}% - {title}")
+                    elif -0.04 <= diff < -0.01:
+                        add_diff(f"🔽 {diff * 100:.2f}% - {title}")
+                    elif diff < -0.04:
+                        add_diff(f"⏬ {diff * 100:.2f}% - {title}")
             else:
                 st.warning("No valid 'Yes' outcome price found.")
         else:
