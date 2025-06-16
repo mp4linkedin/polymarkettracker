@@ -28,15 +28,26 @@ URL = "https://gamma-api.polymarket.com/markets?slug=us-military-action-against-
 response = requests.get(URL)
 markets = response.json()
 
-market = markets[0]  # assuming the first market in list
-title = market['question']
-outcomes = market['outcomes']
-prices = market['outcomePrices']
+st.write("Full response:", markets)  # Debug: show raw JSON
 
-yes_index = outcomes.index("Yes")
-yes_price = prices[yes_index]
+market = markets[0]
+title = market.get('question', 'No title found')
+outcomes = market.get('outcomes', [])
+prices = market.get('outcomePrices', [])
+
+if "Yes" in outcomes:
+    yes_index = outcomes.index("Yes")
+    try:
+        yes_price = float(prices[yes_index])
+    except (IndexError, ValueError):
+        yes_price = None
+else:
+    yes_price = None
 
 st.title("Market Information")
 st.write(f"**Market Title:** {title}")
-st.write(f"**Price of 'Yes':** {yes_price}")
+if yes_price is not None:
+    st.write(f"**Price of 'Yes':** {yes_price}")
+else:
+    st.write("Price of 'Yes' not found or invalid")
 
