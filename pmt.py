@@ -36,38 +36,41 @@ def fetch_market(slug: str):
         data = res.json()
         if isinstance(data, list) and data:
             market = data[0]
+
+            # ✅ Extract correct values based on full JSON you gave
             title = market.get("question", "Unknown Title")
+            prices_raw = market.get("outcomePrices", "[]")  # ← this is a string
+            try:
+                prices = json.loads(prices_raw)  # ← convert string to actual list
+                yes_price = prices[0] if len(prices) > 0 else "N/A"
+                no_price = prices[1] if len(prices) > 1 else "N/A"
+            except Exception as e:
+                yes_price = "N/A"
+                no_price = "N/A"
 
-            # Parse prices from stringified list
-            raw_prices = market.get("outcomePrices", "[]")
-            prices = json.loads(raw_prices)
-
-            yes_price = prices[0] if len(prices) > 0 else "N/A"
-            no_price = prices[1] if len(prices) > 1 else "N/A"
-
-            return title, str(yes_price), str(no_price)
+            return title, yes_price, no_price
         return None, None, None
     except Exception as e:
         return None, None, f"Error: {str(e)}"
 
-# ✅ Read query parameters (they come as flat strings)
+# ✅ Read query parameters
 params = st.query_params
 slug = params.get("slug", "us-military-action-against-iran-before-august")
 title = params.get("title")
 yes_price = params.get("yes")
 no_price = params.get("no")
 
+# ✅ Display from URL if available
 if title and yes_price and no_price:
     st.success("Loaded from URL")
     st.markdown(f"**Market Title:** {unquote(title)}")
-    st.markdown(f"**Yes PriFFFce:** {yes_price}")
+    st.markdown(f"**Yes Price:** {yes_price}")
     st.markdown(f"**No Price:** {no_price}")
 else:
     with st.spinner("Fetching market data..."):
         title, yes_price, no_price = fetch_market(slug)
 
     if title and yes_price and no_price:
-        # ✅ store only clean, flat values
         st.query_params.update({
             "slug": slug,
             "title": quote(title),
@@ -76,8 +79,7 @@ else:
         })
         st.success("Fetched and updated URL")
         st.markdown(f"**Market Title:** {title}")
-        st.markdown(f"**Yes PrFFice:** {yes_price}")
+        st.markdown(f"**Yes Price:** {yes_price}")
         st.markdown(f"**No Price:** {no_price}")
     else:
         st.error(no_price or "Failed to fetch market data.")
-
