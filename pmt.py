@@ -55,8 +55,14 @@ def fetch_market(slug: str):
 params = st.query_params
 slug = params.get("slug", "us-military-action-against-iran-before-august")
 title_param = params.get("title")
-yes_param = params.get("yes")
-no_param = params.get("no")
+yes_param = params.get("yes", None)
+no_param = params.get("no", None)
+
+# Fix Streamlit's handling if values are lists
+if isinstance(yes_param, list):
+    yes_param = yes_param[0]
+if isinstance(no_param, list):
+    no_param = no_param[0]
 
 if title_param and yes_param and no_param:
     st.success("Loaded from URL")
