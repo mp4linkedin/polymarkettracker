@@ -99,5 +99,36 @@ for url in urls:
         unique_title = "entry_" + datetime.utcnow().isoformat()
         cursor.execute("""INSERT INTO counter (market_title, created_at, market_value, p1) VALUES (%s, NOW(), %s, %s);""", (title, yes_price, "-"))
         conn.commit()
+
+
+import pandas as pd
+
+def add_diff(val):
+    print(f"add_diff called with: {val}")
+
+# Sample df assumed sorted by created_at ascending per market_title
+# If not, sort it first:
+df = df.sort_values(['market_title', 'created_at'])
+
+for market, group in df.groupby('market_title'):
+    # Exclude the last row and select last 5 rows before that
+    baseline_rows = group.iloc[:-1].tail(5)
+    baseline = baseline_rows['market_value'].mean()
+
+    # Get the last row value
+    current = group.iloc[-1]['market_value']
+
+    difference = current - baseline
     
+    for market_title, baseline, current in cur.fetchall():
+        diff = current - baseline
+        if diff > 8:
+            add_diff(f"🟢+{diff*100}% - {market_title}")
+        elif 5 < diff <= 8:
+            add_diff(f"🎾+{diff*100}% - {market_title}")
+        elif -8 <= diff < -5:
+            add_diff(f"🟠{diff*100}% - {market_title}")
+        elif diff < -8:
+            add_diff(f"🔴-{diff*100}% - {market_title}")
+
     
