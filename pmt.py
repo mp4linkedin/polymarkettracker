@@ -101,20 +101,36 @@ for url in urls:
         conn.commit()
 
 
+from supabase import create_client, Client
 import pandas as pd
+
+# Initialize Supabase client (replace with your own URL and anon key)
+url: str = "https://your-project.supabase.co"
+key: str = "your-anon-or-service-key"
+supabase: Client = create_client(url, key)
+
+def load_data_from_supabase(table_name: str):
+    response = supabase.table(table_name).select("*").execute()
+    if response.status_code == 200:
+        data = response.data
+        df = pd.DataFrame(data)
+        # Ensure created_at is datetime type
+        df['created_at'] = pd.to_datetime(df['created_at'])
+        return df
+    else:
+        raise Exception(f"Failed to fetch data: {response.status_code} - {response.data}")
 
 def add_diff(val):
     print(f"add_diff called with: {val}")
 
-# Make sure df is sorted by market_title and created_at ascending
+df = load_data_from_supabase("your_table_name")
+
 df = df.sort_values(['market_title', 'created_at'])
 
 for market_title, group in df.groupby('market_title'):
-    # Select last 5 rows excluding the last row
     baseline_rows = group.iloc[:-1].tail(5)
     baseline = baseline_rows['market_value'].mean()
 
-    # Get the last row's market_value
     current = group.iloc[-1]['market_value']
 
     diff = current - baseline
@@ -127,4 +143,3 @@ for market_title, group in df.groupby('market_title'):
         add_diff(f"🟠 {diff * 100:.2f}% - {market_title}")
     elif diff < -8:
         add_diff(f"🔴 {diff * 100:.2f}% - {market_title}")
-
