@@ -84,6 +84,10 @@ for url in urls:
 
 
 
+
+
+
+
 ```python
 import requests
 
@@ -154,7 +158,3 @@ for title in market_titles:
 for note in diff_notifications:
     print(note)
 ```
-
-        st.write(f"🔴 {pct:.2f}% – {market_title}")
-
-
