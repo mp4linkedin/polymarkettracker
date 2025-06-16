@@ -60,7 +60,7 @@ no_price = params.get("no")
 if title and yes_price and no_price:
     st.success("Loaded from URL")
     st.markdown(f"**Market Title:** {unquote(title)}")
-    st.markdown(f"**Yes Price:** {yes_price}")
+    st.markdown(f"**Yes PriFFFce:** {yes_price}")
     st.markdown(f"**No Price:** {no_price}")
 else:
     with st.spinner("Fetching market data..."):
