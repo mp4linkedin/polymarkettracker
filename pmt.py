@@ -132,15 +132,15 @@ def add_diff(message: str):
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
-    url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
-    params = {
-        "chat_id": "289053770",
-        "text": message
-    }
-    try:
-        requests.get(url, params=params, timeout=50)
-    except requests.RequestException:
-        pass  # Silent fail or optionally log error
+    # url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
+    # params = {
+    #     "chat_id": "289053770",
+    #     "text": message
+    # }
+    # try:
+    #     requests.get(url, params=params, timeout=50)
+    # except requests.RequestException:
+    #     pass  # Silent fail or optionally log error
 
     url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
     params = {
@@ -159,6 +159,8 @@ def convert_gamma_to_polymarket_url(gamma_url: str) -> str:
     slug = gamma_url.split("slug=")[-1]
     return f"https://polymarket.com/event/{slug}"
 
+
+add_diff('⚠️ In the past hour, indeces were updated as follows:')
 
 for url in urls:
     try:
