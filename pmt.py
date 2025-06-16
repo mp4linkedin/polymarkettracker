@@ -90,7 +90,7 @@
 
 
 
-import tjime
+import time
 import streamlit as st
 import requests
 import json
