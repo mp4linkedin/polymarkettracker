@@ -22,28 +22,35 @@
 
 import streamlit as st
 import requests
+import time
 
 URL = "https://gamma-api.polymarket.com/markets?slug=us-military-action-against-iran-before-august"
+
+# Wait 1 second before request
+time.sleep(1)
 
 response = requests.get(URL)
 markets = response.json()
 
 market = markets[0]
+title = market.get('question', 'No title found')
+outcomes = market.get('outcomes', [])
+prices = market.get('outcomePrices', [])
 
-st.write("Full outcomes data:", market.get('outcomes'))
-
-# If outcomes is a list of dicts, try:
-if isinstance(market.get('outcomes'), list) and isinstance(market['outcomes'][0], dict):
-    for outcome in market['outcomes']:
-        st.write(outcome)
-        if outcome.get('name') == 'Yes':
-            st.write("Yes price:", outcome.get('price'))
+if "Yes" in outcomes:
+    yes_index = outcomes.index("Yes")
+    try:
+        yes_price = float(prices[yes_index])
+    except (IndexError, ValueError):
+        yes_price = None
 else:
-    # fallback to old approach
-    outcomes = market.get('outcomes', [])
-    prices = market.get('outcomePrices', [])
-    if "Yes" in outcomes:
-        yes_index = outcomes.index("Yes")
-        yes_price = prices[yes_index]
-        st.write("Yes price:", yes_price)
+    yes_price = None
+
+st.title("Market Information")
+st.write(f"**Market Title:** {title}")
+if yes_price is not None and yes_price > 0:
+    st.write(f"**Price of 'Yes':** {yes_price}")
+else:
+    st.write("Price of 'Yes' not available yet, retry shortly.")
+
 
