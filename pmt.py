@@ -66,7 +66,7 @@ for url in urls:
   
 
     import streamlit as st
-    import psycopg2Add commentMore actions
+    import psycopg2
     from datetime import datetime
     
     conn = psycopg2.connect(
