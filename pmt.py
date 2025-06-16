@@ -2,11 +2,11 @@ import streamlit as st
 import psycopg2
 
 conn = psycopg2.connect(
-    host="db.yoapzdfznvualrngslfs.supabase.co",  # ✅ Direct connection
+    host="aws-0-eu-north-1.pooler.supabase.com",
     database="postgres",
-    user="postgres",
-    password="DDeras22",  # 🔒 must be the correct password
-    port=5432
+    user="postgres.yoapzdfznvualrngslfs",  # note the format: user.projectref
+    password="DDeras22",
+    port=6543
 )
 cursor = conn.cursor()
 
