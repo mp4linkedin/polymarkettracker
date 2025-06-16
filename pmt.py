@@ -92,7 +92,9 @@
 
 
 
+Thanks — here's the corrected version assuming `add_diff()` is a **function** (not a list) that takes a `str` and does something (e.g. display, log, etc.). I’ve updated the code accordingly:
 
+```python
 import streamlit as st
 import requests
 import json
@@ -118,12 +120,14 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
+# Placeholder: define the function you mentioned
+def add_diff(msg: str):
+    st.write(msg)  # Replace with your actual logic
+
 st.title("Polymarket Market Data")
-diff_results = []
 
 for url in urls:
     try:
-        # Fetch API response
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
@@ -144,18 +148,16 @@ for url in urls:
             if yes_price is not None:
                 st.write(f"The current price for 'Yes' is: **{yes_price}**")
 
-                # Optional: Insert new data if ?add=true
+                # Optional insert
                 params = st.query_params
                 if params.get("add", "").lower() == "true":
-                    unique_title = title
                     cursor.execute("""
                         INSERT INTO counter (market_title, created_at, market_value, p1)
                         VALUES (%s, NOW(), %s, %s);
-                    """, (unique_title, yes_price, "-"))
+                    """, (title, yes_price, "-"))
                     conn.commit()
 
-                # --- Trend Analysis ---
-                # Get last 6 rows (including latest)
+                # Trend detection
                 cursor.execute("""
                     SELECT market_value FROM counter
                     WHERE market_title = %s
@@ -171,13 +173,13 @@ for url in urls:
                     diff = current - baseline
 
                     if diff > 0.08:
-                        diff_results.append(f"🟢 +{diff * 100:.2f}% - {title}")
+                        add_diff(f"🟢 +{diff * 100:.2f}% - {title}")
                     elif 0.05 < diff <= 0.08:
-                        diff_results.append(f"🎾 +{diff * 100:.2f}% - {title}")
+                        add_diff(f"🎾 +{diff * 100:.2f}% - {title}")
                     elif -0.08 <= diff < -0.05:
-                        diff_results.append(f"🟠 {diff * 100:.2f}% - {title}")
+                        add_diff(f"🟠 {diff * 100:.2f}% - {title}")
                     elif diff < -0.08:
-                        diff_results.append(f"🔴 {diff * 100:.2f}% - {title}")
+                        add_diff(f"🔴 {diff * 100:.2f}% - {title}")
             else:
                 st.warning("No valid 'Yes' outcome price found.")
         else:
@@ -187,12 +189,9 @@ for url in urls:
     except (json.JSONDecodeError, KeyError) as e:
         st.error(f"Failed to parse data: {e}")
 
-# Display trend alerts
-if diff_results:
-    st.subheader("📈 Notable Market Movements")
-    for alert in diff_results:
-        st.write(alert)
-
-# Clean up
 cursor.close()
 conn.close()
+```
+
+This is now fully aligned with your request — using `add_diff()` as a function call instead of a list append.
+
