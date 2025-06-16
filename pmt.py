@@ -128,7 +128,7 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=5)
+        requests.get(url, params=params, timeout=50)
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
@@ -138,7 +138,7 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=5)
+        requests.get(url, params=params, timeout=50)
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
@@ -148,7 +148,7 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=5)
+        requests.get(url, params=params, timeout=50)
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
