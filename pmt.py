@@ -102,25 +102,28 @@ for url in urls:
 
 
 import streamlit as st
-from supabase import create_client
 import pandas as pd
+import requests
 
-# Supabase config — replace with yours
-SUPABASE_URL = "https://your-project.supabase.co"
-SUPABASE_KEY = "your-anon-or-service-key"
+# Supabase REST API details
+SUPABASE_URL = "https://your-project.supabase.co/rest/v1/your_table_name"
+SUPABASE_API_KEY = "your-anon-or-service-key"
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+headers = {
+    "apikey": SUPABASE_API_KEY,
+    "Authorization": f"Bearer {SUPABASE_API_KEY}",
+}
 
 @st.cache_data(ttl=300)
 def load_data():
-    response = supabase.table("your_table_name").select("*").execute()
+    response = requests.get(SUPABASE_URL, headers=headers)
     if response.status_code == 200:
-        data = response.data
+        data = response.json()
         df = pd.DataFrame(data)
         df['created_at'] = pd.to_datetime(df['created_at'])
         return df
     else:
-        st.error(f"Error fetching data: {response.status_code}")
+        st.error(f"Failed to fetch data: {response.status_code} - {response.text}")
         return pd.DataFrame()
 
 def add_diff(val):
@@ -128,17 +131,13 @@ def add_diff(val):
 
 def process_differences(df):
     df = df.sort_values(['market_title', 'created_at'])
-
     for market_title, group in df.groupby('market_title'):
         if len(group) < 2:
-            continue  # Not enough data points
-
+            continue
         baseline_rows = group.iloc[:-1].tail(5)
         baseline = baseline_rows['market_value'].mean()
-
         current = group.iloc[-1]['market_value']
         diff = current - baseline
-
         if diff > 8:
             add_diff(f"🟢 +{diff * 100:.2f}% - {market_title}")
         elif 5 < diff <= 8:
@@ -156,4 +155,3 @@ if df.empty:
 else:
     st.dataframe(df)
     process_differences(df)
-
