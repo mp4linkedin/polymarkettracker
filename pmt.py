@@ -213,9 +213,9 @@ for url in urls:
 
                     if diff > 0.04:
                         add_diff(f"Past hour 🔴⏫ +{diff * 100:.2f}% - {title}")
-                    elif 0.01 < diff <= 0.04:
+                    elif 0.001 < diff <= 0.04:
                         add_diff(f"Past hour 🔼 +{diff * 100:.2f}% - {title}")
-                    elif -0.04 <= diff < -0.01:
+                    elif -0.04 <= diff < -0.001:
                         add_diff(f"Past hour 🔽 {diff * 100:.2f}% - {title}")
                     elif diff < -0.04:
                         add_diff(f"Past hour 🔴⏬ {diff * 100:.2f}% - {title}")
