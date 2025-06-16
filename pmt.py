@@ -105,6 +105,7 @@ urls = [
     "https://gamma-api.polymarket.com/markets?slug=us-x-iran-nuclear-deal-in-2025",
     "https://gamma-api.polymarket.com/markets?slug=us-iran-nuclear-deal-before-july",
     "https://gamma-api.polymarket.com/markets?slug=khamenei-out-as-supreme-leader-of-iran-by-june-30"
+    "https://gamma-api.polymarket.com/markets?slug=israel-x-iran-ceasefire-before-july"
 ]
 
 # PostgreSQL connection (Supabase)
@@ -200,12 +201,10 @@ for url in urls:
                     baseline = sum(values[1:]) / 5
                     diff = current - baseline
 
-                    # add_diff(baseline)
-                    # add_diff(current)
+                    add_diff(f"{title}: current: {current}, baseline [{values[1:]}], {baseline}]")
 
                     if diff > 0.04:
                         add_diff(f"⏫ +{diff * 100:.2f}% - {title}")
-
                     elif 0.01 < diff <= 0.04:
                         add_diff(f"🔼 +{diff * 100:.2f}% - {title}")
                     elif -0.04 <= diff < -0.01:
