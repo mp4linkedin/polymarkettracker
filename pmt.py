@@ -1,18 +1,21 @@
 import streamlit as st
-import sqlite3
+import psycopg2
+import urllib.parse
 
-# DB setup
-conn = sqlite3.connect("example.db", check_same_thread=False)
+# Decode URL password if needed
+password = urllib.parse.quote("YOUR_PASSWORD")  # e.g., if it has @ or special chars
+
+conn = psycopg2.connect(
+    host="db.yoapzdfznvualrngslfs.supabase.co",
+    database="postgres",
+    user="postgres",
+    password="DDeras22",  # or use decoded `password` if special characters
+    port=5432
+)
 cursor = conn.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS counter (value INTEGER);")
-conn.commit()
 
-# Insert if ?add=true
+# Add row if ?add=true
 params = st.query_params
 if params.get("add", "").lower() == "true":
     cursor.execute("INSERT INTO counter (value) VALUES (1);")
     conn.commit()
-
-# Show current count
-count = cursor.execute("SELECT COUNT(*) FROM counter").fetchone()[0]
-st.write("Total rows:", count)
