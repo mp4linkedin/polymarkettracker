@@ -92,9 +92,6 @@
 
 
 
-Thanks — here's the corrected version assuming `add_diff()` is a **function** (not a list) that takes a `str` and does something (e.g. display, log, etc.). I’ve updated the code accordingly:
-
-```python
 import streamlit as st
 import requests
 import json
@@ -191,7 +188,5 @@ for url in urls:
 
 cursor.close()
 conn.close()
-```
 
-This is now fully aligned with your request — using `add_diff()` as a function call instead of a list append.
 
