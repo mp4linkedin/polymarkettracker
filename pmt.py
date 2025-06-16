@@ -27,45 +27,54 @@ from urllib.parse import quote, unquote
 
 st.set_page_config("📊 Polymarket Tracker", layout="centered")
 
-def fetch_market_data(slug):
+def fetch_market(slug: str):
     url = f"https://gamma-api.polymarket.com/markets?slug={slug}"
     try:
         res = requests.get(url)
         res.raise_for_status()
         data = res.json()
-        markets = data.get("markets", [])  # ✅ Correct: it's a dict with 'markets' key
-        if markets:
-            market = markets[0]
-            title = market.get("title", "")
-            outcomes = market.get("outcomes", [])
-            yes_price = next((o["price"] for o in outcomes if o["name"].lower() == "yes"), "N/A")
-            return title, yes_price
-        return None, "Market not found"
+        if isinstance(data, list) and data:
+            market = data[0]
+            title = market.get("question", "Unknown Title")
+            prices = market.get("outcomePrices", [])
+            if len(prices) >= 2:
+                yes_price = prices[0]
+                no_price = prices[1]
+                return title, yes_price, no_price
+            else:
+                return title, "N/A", "N/A"
+        return None, None, None
     except Exception as e:
-        return None, f"Error: {str(e)}"
+        return None, None, f"Error: {str(e)}"
 
-# ✅ Use updated query param API
+# ✅ Read query parameters
 params = st.query_params
 slug = params.get("slug", "us-military-action-against-iran-before-august")
 title = params.get("title")
-price = params.get("price")
+yes_price = params.get("yes")
+no_price = params.get("no")
 
-if title and price:
+# ✅ Display from query string if available
+if title and yes_price and no_price:
     st.success("Loaded from URL")
     st.markdown(f"**Market Title:** {unquote(title)}")
-    st.markdown(f"**Price (Yes):** {price}")
+    st.markdown(f"**Yes Price:** {yes_price}")
+    st.markdown(f"**No Price:** {no_price}")
 else:
-    with st.spinner("Fetching market info..."):
-        title, price = fetch_market_data(slug)
+    with st.spinner("Fetching market data..."):
+        title, yes_price, no_price = fetch_market(slug)
 
-    if title and price:
+    if title and yes_price and no_price:
         st.query_params.update({
             "slug": slug,
             "title": quote(title),
-            "price": price
+            "yes": yes_price,
+            "no": no_price
         })
-        st.success("Data fetched and URL updated")
+        st.success("Fetched and updated URL")
         st.markdown(f"**Market Title:** {title}")
-        st.markdown(f"**Price (Yes):** {price}")
+        st.markdown(f"**Yes Price:** {yes_price}")
+        st.markdown(f"**No Price:** {no_price}")
     else:
-        st.error(price or "Unable to load market data.")
+        st.error(no_price or "Failed to fetch market data.")
+
