@@ -1,24 +1,4 @@
-# import streamlit as st
-# import psycopg2
-# from datetime import datetime
 
-# conn = psycopg2.connect(
-#     host="aws-0-eu-north-1.pooler.supabase.com",
-#     database="postgres",
-#     user="postgres.yoapzdfznvualrngslfs",
-#     password="DDeras22",
-#     port=6543
-# )
-# cursor = conn.cursor()
-
-# params = st.query_params
-# if params.get("add", "").lower() == "true":
-#     unique_title = "entry_" + datetime.utcnow().isoformat()
-#     cursor.execute("""
-#         INSERT INTO counter (market_title, created_at, market_value, p1)
-#         VALUES (%s, NOW(), %s, %s);
-#     """, (unique_title, 1.0, "-"))
-#     conn.commit()
 
 import streamlit as st
 import requests
@@ -101,57 +81,90 @@ for url in urls:
         conn.commit()
 
 
+
+
+
+```python
 import streamlit as st
-import pandas as pd
-import requests
+import psycopg2
+import numpy as np
 
-# Supabase REST API details
-SUPABASE_URL = "https://your-project.supabase.co/rest/v1/your_table_name"
-SUPABASE_API_KEY = "your-anon-or-service-key"
+# This list will hold the formatted difference strings for each market.
+diff_messages = []
 
-headers = {
-    "apikey": SUPABASE_API_KEY,
-    "Authorization": f"Bearer {SUPABASE_API_KEY}",
-}
+# Assume 'conn' and 'cursor' for the database connection are already established
+# and 'urls' and 'titles' (from the API calls) are available from the preceding code.
 
-@st.cache_data(ttl=300)
-def load_data():
-    response = requests.get(SUPABASE_URL, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        df = pd.DataFrame(data)
-        df['created_at'] = pd.to_datetime(df['created_at'])
-        return df
-    else:
-        st.error(f"Failed to fetch data: {response.status_code} - {response.text}")
-        return pd.DataFrame()
+# This example uses a placeholder for market titles. In the full script,
+# this would be populated dynamically from the API call results.
+market_titles = [
+    "Will the US conduct military action against Iran before August 1?",
+    "Will Ali Khamenei be the Supreme Leader of Iran at the end of 2025?",
+    "Will the US and Iran have a public nuclear deal in 2025?",
+    "Will the US and Iran have a public nuclear deal before July 1?",
+    "Will Ali Khamenei be the Supreme Leader of Iran on June 30, 2025?"
+]
 
-def add_diff(val):
-    st.write(f"add_diff called with: {val}")
 
-def process_differences(df):
-    df = df.sort_values(['market_title', 'created_at'])
-    for market_title, group in df.groupby('market_title'):
-        if len(group) < 2:
+for market_title in market_titles:
+    try:
+        # 1. Select the last 6 rows for the current market to get the current value and baseline values.
+        # We order by creation time in descending order to get the newest entries first.
+        cursor.execute("""
+            SELECT market_value FROM counter
+            WHERE market_title = %s
+            ORDER BY created_at DESC
+            LIMIT 6;
+        """, (market_title,))
+        
+        rows = cursor.fetchall()
+
+        # We need at least 2 data points (1 for current, 1 for baseline) to make a comparison.
+        # The pseudo-code implies needing 6 (1 current + 5 for baseline avg).
+        if len(rows) < 6:
+            # Not enough data to calculate a baseline and difference, so we skip this market.
+            # st.write(f"Not enough data for '{market_title}' to calculate trend.")
             continue
-        baseline_rows = group.iloc[:-1].tail(5)
-        baseline = baseline_rows['market_value'].mean()
-        current = group.iloc[-1]['market_value']
+
+        # 2. The first row is the most recent entry (current value).
+        # The values are stored as floats (e.g., 0.15), so we multiply by 100 to work with percentages.
+        current = float(rows[0][0]) * 100
+        
+        # 3. The next 5 rows are used to calculate the baseline average.
+        baseline_values = [float(row[0]) * 100 for row in rows[1:]]
+        baseline = np.mean(baseline_values)
+
+        # 4. Calculate the difference between the current value and the baseline.
         diff = current - baseline
+
+        # 5. Based on the difference, format a string with an appropriate emoji and add it to our list.
+        # The thresholds (e.g., 8, 5) represent percentage point changes.
         if diff > 8:
-            add_diff(f"🟢 +{diff * 100:.2f}% - {market_title}")
+            diff_messages.append(f"🟢 +{diff:.2f}% - {market_title}")
         elif 5 < diff <= 8:
-            add_diff(f"🎾 +{diff * 100:.2f}% - {market_title}")
+            diff_messages.append(f"🎾 +{diff:.2f}% - {market_title}")
         elif -8 <= diff < -5:
-            add_diff(f"🟠 {diff * 100:.2f}% - {market_title}")
+            diff_messages.append(f"🟠 {diff:.2f}% - {market_title}")
         elif diff < -8:
-            add_diff(f"🔴 {diff * 100:.2f}% - {market_title}")
+            diff_messages.append(f"🔴 {diff:.2f}% - {market_title}")
 
-st.title("Market Value Difference Tracker")
+    except psycopg2.Error as e:
+        st.error(f"Database error for market '{market_title}': {e}")
+    except (ValueError, IndexError) as e:
+        st.error(f"Data processing error for market '{market_title}': {e}")
 
-df = load_data()
-if df.empty:
-    st.warning("No data loaded.")
+
+# After checking all markets, display the collected trend messages.
+if diff_messages:
+    st.header("Recent Market Trends")
+    for message in diff_messages:
+        st.write(message)
 else:
-    st.dataframe(df)
-    process_differences(df)
+    st.info("No significant market trends detected based on the defined thresholds.")
+
+# It's important to close the cursor and connection after all operations are complete.
+# This would typically be at the end of the script.
+# cursor.close()
+# conn.close()
+```
+
