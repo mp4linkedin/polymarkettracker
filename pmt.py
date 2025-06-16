@@ -128,12 +128,11 @@ def add_diff(message: str):
         "chat_id": "100010019",
         "text": message
     }
-    try:
-        response = requests.post(url, json=payload, timeout=5)
-        response.raise_for_status()
-        _ = response.text  # forces full response read, ensures TCP closes cleanly
-    except requests.RequestException:
-        pass
+
+    response = requests.post(url, json=payload, timeout=5)
+    response.raise_for_status()
+    _ = response.text  # forces full response read, ensures TCP closes cleanly
+    time.sleep(1)
 
 
     url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
@@ -141,25 +140,22 @@ def add_diff(message: str):
         "chat_id": "289053770",
         "text": message
     }
-    try:
-       response = requests.post(url, json=payload, timeout=5)
-        response.raise_for_status()
-        _ = response.text  # forces full response read, ensures TCP closes cleanly
-    except requests.RequestException:
-        pass  # Silent fail or optionally log error
+
+   response = requests.post(url, json=payload, timeout=5)
+    response.raise_for_status()
+    _ = response.text  # forces full response read, ensures TCP closes cleanly
+    time.sleep(1)
 
     url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
     params = {
         "chat_id": "1827419176",
         "text": message
     }
-    try:
-        response = requests.post(url, json=payload, timeout=5)
-        response.raise_for_status()
-        _ = response.text  # forces full response read, ensures TCP closes cleanly
-    except requests.RequestException:
-        pass  # Silent fail or optionally log error
 
+    response = requests.post(url, json=payload, timeout=5)
+    response.raise_for_status()
+    _ = response.text  # forces full response read, ensures TCP closes cleanly
+    time.sleep(1)
 
 st.title("Polymarket Market Data")
 
