@@ -12,5 +12,8 @@ cursor = conn.cursor()
 
 params = st.query_params
 if params.get("add", "").lower() == "true":
-    cursor.execute("INSERT INTO counter (value) VALUES (1);")
+    cursor.execute("""
+    INSERT INTO counter (market_title, created_at, market_value, p1)
+    VALUES ('-', NOW(), 1.0, '-');
+""")
     conn.commit()
