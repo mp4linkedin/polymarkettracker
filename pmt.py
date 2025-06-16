@@ -22,63 +22,45 @@
 
 
 import streamlit as st
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+import requests
 from urllib.parse import quote, unquote
-from webdriver_manager.chrome import ChromeDriverManager
 
-st.set_page_config(page_title="Polymarket Market Info", layout="centered")
-st.title("📊 Polymarket Market Data")
+st.set_page_config("📊 Polymarket Tracker", layout="centered")
 
-@st.cache_resource
-def get_driver():
-    options = Options()
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-
-def fetch_market():
-    url = "https://polymarket.com/event/us-military-action-against-iran-before-august?tid=1750074158260"
-    driver = get_driver()
+def fetch_market_data(slug):
+    url = f"https://gamma-api.polymarket.com/markets?slug={slug}"
     try:
-        driver.get(url)
-        wait = WebDriverWait(driver, 15)
-
-        title_elem = wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
-        price_elem = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='market-outcome-price']")))
-
-        title = title_elem.text.strip()
-        price = price_elem.text.strip()
-
-        return title, price
-
+        res = requests.get(url)
+        res.raise_for_status()
+        data = res.json()
+        if data:
+            market = data[0]
+            title = market.get("title", "")
+            outcomes = market.get("outcomes", [])
+            yes_price = next((o["price"] for o in outcomes if o["name"].lower() == "yes"), "N/A")
+            return title, yes_price
+        return None, None
     except Exception as e:
-        return None, f"Error: {e}"
+        return None, f"Error: {str(e)}"
 
-    finally:
-        driver.quit()
-
-# Read query params
+# Read from URL query
 params = st.experimental_get_query_params()
-title_param = params.get("title", [None])[0]
-price_param = params.get("price", [None])[0]
+slug = params.get("slug", ["us-military-action-against-iran-before-august"])[0]
+title = params.get("title", [None])[0]
+price = params.get("price", [None])[0]
 
-if title_param and price_param:
+if title and price:
     st.success("Loaded from URL")
-    st.markdown(f"**Market Title:** {unquote(title_param)}")
-    st.markdown(f"**Market Price (Yes):** {price_param}")
+    st.markdown(f"**Market Title:** {unquote(title)}")
+    st.markdown(f"**Price (Yes):** {price}")
 else:
-    with st.spinner("Fetching market data..."):
-        title, price = fetch_market()
-    if title:
-        st.experimental_set_query_params(title=quote(title), price=price)
-        st.success("Fetched and updated URL!")
+    with st.spinner("Fetching market info..."):
+        title, price = fetch_market_data(slug)
+
+    if title and price:
+        st.experimental_set_query_params(slug=slug, title=quote(title), price=price)
+        st.success("Data fetched and URL updated")
         st.markdown(f"**Market Title:** {title}")
-        st.markdown(f"**Market Price (Yes):** {price}")
+        st.markdown(f"**Price (Yes):** {price}")
     else:
-        st.error(price)
+        st.error(price or "Unable to load market data.")
