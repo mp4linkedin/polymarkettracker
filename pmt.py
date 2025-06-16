@@ -180,8 +180,12 @@ for url in urls:
                     baseline = sum(values[1:]) / 5
                     diff = current - baseline
 
+                    add_diff(baseline)
+                    add_diff(current)
+
                     if diff > 0.008:
                         add_diff(f"🟢 +{diff * 100:.2f}% - {title}")
+
                     elif 0.005 < diff <= 0.008:
                         add_diff(f"🎾 +{diff * 100:.2f}% - {title}")
                     elif -0.008 <= diff < -0.005:
