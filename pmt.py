@@ -23,7 +23,7 @@
 
 import streamlit as st
 import requests
-import json
+import re
 from urllib.parse import quote, unquote
 
 st.set_page_config("📊 Polymarket Tracker", layout="centered")
@@ -35,27 +35,23 @@ def fetch_market(slug: str):
         res.raise_for_status()
         data = res.json()
 
-        if isinstance(data, list) and len(data) > 0:
+        if isinstance(data, list) and data:
             market = data[0]
-            title = market.get("question", "No title found")
+            title = market.get("question", "Unknown Title")
+            prices_raw = market.get("outcomePrices", "")
 
-            # Parse prices from string manually
-            prices_str = market.get("outcomePrices", "[]")
-            try:
-                prices = json.loads(prices_str)
-                yes_price = prices[0] if len(prices) > 0 else "N/A"
-                no_price = prices[1] if len(prices) > 1 else "N/A"
-            except json.JSONDecodeError:
-                yes_price = "N/A"
-                no_price = "N/A"
+            # ✅ Use regex to extract numbers like "0.475", "0.525"
+            matches = re.findall(r'\d+\.\d+', prices_raw)
+            yes_price = matches[0] if len(matches) > 0 else "N/A"
+            no_price = matches[1] if len(matches) > 1 else "N/A"
 
-            return title, str(yes_price), str(no_price)
+            return title, yes_price, no_price
         else:
-            return None, None, "Market not found or data malformed"
+            return None, None, "Market not found"
     except Exception as e:
-        return None, None, f"Error fetching data: {str(e)}"
+        return None, None, f"Error: {str(e)}"
 
-# Read from query string
+# ✅ Read from URL query
 params = st.query_params
 slug = params.get("slug", "us-military-action-against-iran-before-august")
 title_param = params.get("title")
@@ -83,5 +79,5 @@ else:
         st.markdown(f"**Yes Price:** {yes_price}")
         st.markdown(f"**No Price:** {no_price}")
     else:
-        st.error(no_price or "Unknown error occurred.")
+        st.error(no_price or "Unable to load market data.")
 
