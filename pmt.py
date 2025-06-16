@@ -141,7 +141,7 @@ def add_diff(message: str):
         "text": message
     }
     try:
-        requests.get(url, params=params, timeout=50)
+        requests.get(url, params=params, timeout=2)
     except requests.RequestException:
         pass  # Silent fail or optionally log error
 
@@ -214,13 +214,13 @@ for url in urls:
                     # add_diff(f"{title}: current: {current}, baseline [{values[1:]}], {baseline}]")
                     # add_diff(convert_gamma_to_polymarket_url(url))
 
-                    if diff > 0.04:
+                    if diff > 0.035:
                         add_diff(f"Last 5 minutes 🔴⏫ +{diff * 100:.2f}% - {title}")
-                    elif 0.001 < diff <= 0.04:
+                    elif 0.025 < diff <= 0.035:
                         add_diff(f"Last 5 minutes 🟡🔼 +{diff * 100:.2f}% - {title}")
-                    elif -0.04 <= diff < -0.001:
+                    elif -0.035 <= diff < -0.025:
                         add_diff(f"Last 5 minutes 🟡🔽 {diff * 100:.2f}% - {title}")
-                    elif diff < -0.04:
+                    elif diff < -0.035:
                         add_diff(f"Last 5 minutes 🔴⏬ {diff * 100:.2f}% - {title}")
                     
             else:
