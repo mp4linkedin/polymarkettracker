@@ -23,6 +23,7 @@
 
 import streamlit as st
 import requests
+import json
 from urllib.parse import quote, unquote
 
 st.set_page_config("📊 Polymarket Tracker", layout="centered")
@@ -36,25 +37,28 @@ def fetch_market(slug: str):
         if isinstance(data, list) and data:
             market = data[0]
             title = market.get("question", "Unknown Title")
-            prices = market.get("outcomePrices", [])
-            if len(prices) >= 2:
-                yes_price = prices[0]
-                no_price = prices[1]
-                return title, yes_price, no_price
-            else:
-                return title, "N/A", "N/A"
+
+            raw_prices = market.get("outcomePrices", "[]")
+            try:
+                prices = json.loads(raw_prices)
+                yes_price = prices[0] if len(prices) > 0 else "N/A"
+                no_price = prices[1] if len(prices) > 1 else "N/A"
+            except Exception:
+                yes_price = "N/A"
+                no_price = "N/A"
+
+            return title, yes_price, no_price
         return None, None, None
     except Exception as e:
         return None, None, f"Error: {str(e)}"
 
-# ✅ Read query parameters
+# ✅ Read from URL query
 params = st.query_params
 slug = params.get("slug", "us-military-action-against-iran-before-august")
 title = params.get("title")
 yes_price = params.get("yes")
 no_price = params.get("no")
 
-# ✅ Display from query string if available
 if title and yes_price and no_price:
     st.success("Loaded from URL")
     st.markdown(f"**Market Title:** {unquote(title)}")
