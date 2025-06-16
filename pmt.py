@@ -63,9 +63,9 @@ for url in urls:
     except (json.JSONDecodeError, KeyError) as e:
         st.error(f"Failed to parse the data: {e}")
     
-    import streamlit as st
-    import psycopg2
-    from datetime import datetime
+    # import streamlit as st
+    # import psycopg2
+    # from datetime import datetime
     
     # conn = psycopg2.connect(
     #     host="aws-0-eu-north-1.pooler.supabase.com",
