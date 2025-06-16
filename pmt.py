@@ -32,14 +32,15 @@ def fetch_market_data(slug):
     try:
         res = requests.get(url)
         res.raise_for_status()
-        markets = res.json()  # Gamma API returns a list directly
+        data = res.json()
+        markets = data.get("markets", [])  # ✅ Correct: it's a dict with 'markets' key
         if markets:
             market = markets[0]
             title = market.get("title", "")
             outcomes = market.get("outcomes", [])
             yes_price = next((o["price"] for o in outcomes if o["name"].lower() == "yes"), "N/A")
             return title, yes_price
-        return None, None
+        return None, "Market not found"
     except Exception as e:
         return None, f"Error: {str(e)}"
 
