@@ -30,7 +30,7 @@ urls = [
     "https://gamma-api.polymarket.com/markets?slug=us-military-action-against-iran-before-august",
     "https://gamma-api.polymarket.com/markets?slug=khamenei-out-as-supreme-leader-of-iran-in-2025",
     "https://gamma-api.polymarket.com/markets?slug=us-x-iran-nuclear-deal-in-2025",
-    "https://gamma-api.polymarket.com/markets?slug=us-iran-nuclear-deal-before-julyt",
+    "https://gamma-api.polymarket.com/markets?slug=us-iran-nuclear-deal-before-july",
     "https://gamma-api.polymarket.com/markets?slug=khamenei-out-as-supreme-leader-of-iran-by-june-30"
 ]
 
