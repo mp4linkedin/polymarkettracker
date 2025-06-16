@@ -84,86 +84,50 @@ for url in urls:
 
 
 
-import streamlit as st
-import psycopg2
-import numpy as np
-
-# This list will hold the formatted difference strings for each market.
-diff_messages = []
-
-# Assume 'conn' and 'cursor' for the database connection are already established
-# and 'urls' and 'titles' (from the API calls) are available from the preceding code.
-
-# This example uses a placeholder for market titles. In the full script,
-# this would be populated dynamically from the API call results.
-market_titles = [
-    "Will the US conduct military action against Iran before August 1?",
-    "Will Ali Khamenei be the Supreme Leader of Iran at the end of 2025?",
-    "Will the US and Iran have a public nuclear deal in 2025?",
-    "Will the US and Iran have a public nuclear deal before July 1?",
-    "Will Ali Khamenei be the Supreme Leader of Iran on June 30, 2025?"
-]
-
+# First, fetch the distinct list of market titles we care about:
+cursor.execute("SELECT DISTINCT market_title FROM counter;")
+market_titles = [row[0] for row in cursor.fetchall()]
 
 for market_title in market_titles:
-    try:
-        # 1. Select the last 6 rows for the current market to get the current value and baseline values.
-        # We order by creation time in descending order to get the newest entries first.
-        cursor.execute("""
-            SELECT market_value FROM counter
-            WHERE market_title = %s
-            ORDER BY created_at DESC
-            LIMIT 6;
-        """, (market_title,))
-        
-        rows = cursor.fetchall()
+    # 1. Get the previous 5 values, excluding the most recent entry
+    cursor.execute("""
+        SELECT market_value
+        FROM counter
+        WHERE market_title = %s
+        ORDER BY created_at DESC
+        OFFSET 1
+        LIMIT 5;
+    """, (market_title,))
+    past_rows = [r[0] for r in cursor.fetchall()]
+    if len(past_rows) < 5:
+        # Not enough data to compute a baseline
+        continue
 
-        # We need at least 2 data points (1 for current, 1 for baseline) to make a comparison.
-        # The pseudo-code implies needing 6 (1 current + 5 for baseline avg).
-        if len(rows) < 6:
-            # Not enough data to calculate a baseline and difference, so we skip this market.
-            # st.write(f"Not enough data for '{market_title}' to calculate trend.")
-            continue
+    # 2. Compute the baseline as the average of those 5 values
+    baseline = sum(past_rows) / len(past_rows)
 
-        # 2. The first row is the most recent entry (current value).
-        # The values are stored as floats (e.g., 0.15), so we multiply by 100 to work with percentages.
-        current = float(rows[0][0]) * 100
-        
-        # 3. The next 5 rows are used to calculate the baseline average.
-        baseline_values = [float(row[0]) * 100 for row in rows[1:]]
-        baseline = np.mean(baseline_values)
+    # 3. Get the very latest value
+    cursor.execute("""
+        SELECT market_value
+        FROM counter
+        WHERE market_title = %s
+        ORDER BY created_at DESC
+        LIMIT 1;
+    """, (market_title,))
+    current = cursor.fetchone()[0]
 
-        # 4. Calculate the difference between the current value and the baseline.
-        diff = current - baseline
+    # 4. Compute the difference
+    diff = current - baseline
+    diff_pct = diff * 100
 
-        # 5. Based on the difference, format a string with an appropriate emoji and add it to our list.
-        # The thresholds (e.g., 8, 5) represent percentage point changes.
-        if diff > 8:
-            diff_messages.append(f"🟢 +{diff:.2f}% - {market_title}")
-        elif 5 < diff <= 8:
-            diff_messages.append(f"🎾 +{diff:.2f}% - {market_title}")
-        elif -8 <= diff < -5:
-            diff_messages.append(f"🟠 {diff:.2f}% - {market_title}")
-        elif diff < -8:
-            diff_messages.append(f"🔴 {diff:.2f}% - {market_title}")
-
-    except psycopg2.Error as e:
-        st.error(f"Database error for market '{market_title}': {e}")
-    except (ValueError, IndexError) as e:
-        st.error(f"Data processing error for market '{market_title}': {e}")
-
-
-# After checking all markets, display the collected trend messages.
-if diff_messages:
-    st.header("Recent Market Trends")
-    for message in diff_messages:
-        st.write(message)
-else:
-    st.info("No significant market trends detected based on the defined thresholds.")
-
-# It's important to close the cursor and connection after all operations are complete.
-# This would typically be at the end of the script.
-# cursor.close()
-# conn.close()
+    # 5. Categorize and report
+    if diff > 0.08:
+        add_diff(f"🟢 +{diff_pct:.2f}% - {market_title}")
+    elif 0.05 < diff <= 0.08:
+        add_diff(f"🎾 +{diff_pct:.2f}% - {market_title}")
+    elif -0.08 <= diff < -0.05:
+        add_diff(f"🟠 {diff_pct:.2f}% - {market_title}")
+    elif diff < -0.08:
+        add_diff(f"🔴 {diff_pct:.2f}% - {market_title}")
 
 
