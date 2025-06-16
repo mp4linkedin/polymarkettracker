@@ -32,8 +32,7 @@ def fetch_market_data(slug):
     try:
         res = requests.get(url)
         res.raise_for_status()
-        data = res.json()
-        markets = data.get("markets", [])  # <-- FIX: Gamma API wraps results in "markets" key
+        markets = res.json()  # Gamma API returns a list directly
         if markets:
             market = markets[0]
             title = market.get("title", "")
@@ -44,7 +43,7 @@ def fetch_market_data(slug):
     except Exception as e:
         return None, f"Error: {str(e)}"
 
-# ✅ Use new query param API
+# ✅ Use updated query param API
 params = st.query_params
 slug = params.get("slug", "us-military-action-against-iran-before-august")
 title = params.get("title")
