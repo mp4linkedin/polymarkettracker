@@ -131,7 +131,7 @@ def add_diff(message: str):
     response = requests.post(url, json=payload, timeout=5)
     response.raise_for_status()
     _ = response.text
-    time.sleep(1)
+    #time.sleep(1)
 
     payload = {
         "chat_id": "289053770",
@@ -140,7 +140,7 @@ def add_diff(message: str):
     response = requests.post(url, json=payload, timeout=5)
     response.raise_for_status()
     _ = response.text
-    time.sleep(1)
+    #time.sleep(1)
 
     payload = {
         "chat_id": "1827419176",
@@ -149,7 +149,7 @@ def add_diff(message: str):
     response = requests.post(url, json=payload, timeout=5)
     response.raise_for_status()
     _ = response.text
-    time.sleep(1)
+    #time.sleep(1)
     
 st.title("Polymarket Market Data")
 
