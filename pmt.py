@@ -202,7 +202,7 @@ for url in urls:
                     diff = current - baseline
 
                     add_diff(f"{title}: current: {current}, baseline [{values[1:]}], {baseline}]")
-                    add_diff(url)
+                    add_diff(url.replace('gamma-api.',''))
 
                     if diff > 0.04:
                         add_diff(f"⏫ +{diff * 100:.2f}% - {title}")
