@@ -85,13 +85,18 @@ for url in urls:
 
 
 
+import streamlit as st
+import psycopg2
 
-# First, fetch the distinct list of market titles we care about:
+# assume `conn` is an existing psycopg2 connection
+cursor = conn.cursor()
+
+# Collect all distinct market titles
 cursor.execute("SELECT DISTINCT market_title FROM counter;")
 market_titles = [row[0] for row in cursor.fetchall()]
 
 for market_title in market_titles:
-    # 1. Get the previous 5 values, excluding the most recent entry
+    # Fetch the previous 5 values (excluding the very latest)
     cursor.execute("""
         SELECT market_value
         FROM counter
@@ -100,15 +105,14 @@ for market_title in market_titles:
         OFFSET 1
         LIMIT 5;
     """, (market_title,))
-    past_rows = [r[0] for r in cursor.fetchall()]
-    if len(past_rows) < 5:
-        # Not enough data to compute a baseline
-        continue
-
-    # 2. Compute the baseline as the average of those 5 values
-    baseline = sum(past_rows) / len(past_rows)
-
-    # 3. Get the very latest value
+    prev_values = [r[0] for r in cursor.fetchall()]
+    
+    if len(prev_values) < 5:
+        continue  # not enough data yet
+    
+    baseline = sum(prev_values) / len(prev_values)
+    
+    # Fetch the current (most recent) value
     cursor.execute("""
         SELECT market_value
         FROM counter
@@ -117,19 +121,17 @@ for market_title in market_titles:
         LIMIT 1;
     """, (market_title,))
     current = cursor.fetchone()[0]
-
-    # 4. Compute the difference
-    diff = current - baseline
-    diff_pct = diff * 100
-
-    # 5. Categorize and report
+    
+    diff = current - baseline  # in fractional terms (e.g. 0.05 == 5%)
+    pct = diff * 100           # convert to percentage
+    
     if diff > 0.08:
-        add_diff(f"🟢 +{diff_pct:.2f}% - {market_title}")
+        st.write(f"🟢 +{pct:.2f}% – {market_title}")
     elif 0.05 < diff <= 0.08:
-        add_diff(f"🎾 +{diff_pct:.2f}% - {market_title}")
+        st.write(f"🎾 +{pct:.2f}% – {market_title}")
     elif -0.08 <= diff < -0.05:
-        add_diff(f"🟠 {diff_pct:.2f}% - {market_title}")
+        st.write(f"🟠 {pct:.2f}% – {market_title}")
     elif diff < -0.08:
-        add_diff(f"🔴 {diff_pct:.2f}% - {market_title}")
+        st.write(f"🔴 {pct:.2f}% – {market_title}")
 
 
