@@ -121,7 +121,7 @@ cursor = conn.cursor()
 import requests
 
 
-def add_diff(message: str):
+def hadd_diff(message: str):
     url = "https://api.telegram.org/bot7194674196:AAHIs0vU-wbm8j_cleL68hALarIRqSp6DXs/sendMessage"
 
     payload = {
